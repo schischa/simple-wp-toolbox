@@ -1,4 +1,4 @@
-k<?php
+<?php
 // Disable WP logo and links in the admin bar
 add_action('admin_bar_menu', 'chr_remove_wp_logo', 999);
 function chr_remove_wp_logo( $wp_admin_bar ) {
