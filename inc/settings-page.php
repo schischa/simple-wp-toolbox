@@ -12,7 +12,7 @@ function marcs_cwf_create_settings_page() {
 
 add_action('admin_init', 'marcs_cwf_register_settings');
 function marcs_cwf_register_settings() {
-    // Existing settings...
+    // Existing settings
     register_setting('marcs_cwf_settings_group', 'marcs_cwf_theme_color', array(
         'type'              => 'string',
         'sanitize_callback' => 'sanitize_hex_color',
@@ -31,7 +31,7 @@ function marcs_cwf_register_settings() {
         'default'           => 0,
     ));
 
-    // New settings for update email disabling
+    // Update email settings
     register_setting('marcs_cwf_settings_group', 'marcs_cwf_disable_core_update_emails', array(
         'type'              => 'boolean',
         'sanitize_callback' => 'absint',
@@ -48,7 +48,29 @@ function marcs_cwf_register_settings() {
         'default'           => 0,
     ));
 
-    // Existing sections...
+    // 🆕 Site Health test disabling options
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_disable_php_version_test', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 0,
+    ));
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_disable_theme_version_test', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 0,
+    ));
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_disable_https_status_test', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 0,
+    ));
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_disable_background_updates_test', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 0,
+    ));
+
+    // Sections
     add_settings_section(
         'marcs_cwf_theme_section',
         'Theme Settings',
@@ -91,7 +113,6 @@ function marcs_cwf_register_settings() {
         'marcs_cwf_advanced_section'
     );
 
-    // New Updates Notifications Section
     add_settings_section(
         'marcs_cwf_updates_section',
         'Update Notifications',
@@ -119,98 +140,107 @@ function marcs_cwf_register_settings() {
         'marcs_cwf_settings_group',
         'marcs_cwf_updates_section'
     );
+
+    // 🆕 Site Health Section
+    add_settings_section(
+        'marcs_cwf_site_health_section',
+        'Site Health Settings',
+        'marcs_cwf_site_health_section_cb',
+        'marcs_cwf_settings_group'
+    );
+    add_settings_field(
+        'marcs_cwf_disable_php_version_test_field',
+        'Disable PHP Version Test',
+        'marcs_cwf_disable_php_version_test_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_site_health_section'
+    );
+    add_settings_field(
+        'marcs_cwf_disable_theme_version_test_field',
+        'Disable Theme Version Test',
+        'marcs_cwf_disable_theme_version_test_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_site_health_section'
+    );
+    add_settings_field(
+        'marcs_cwf_disable_https_status_test_field',
+        'Disable HTTPS Status Test',
+        'marcs_cwf_disable_https_status_test_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_site_health_section'
+    );
+    add_settings_field(
+        'marcs_cwf_disable_background_updates_test_field',
+        'Disable Background Updates Test',
+        'marcs_cwf_disable_background_updates_test_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_site_health_section'
+    );
 }
 
-function marcs_cwf_theme_section_cb() {
-    echo '<p>Set the theme color used by modern browsers for UI elements.</p>';
-}
+// Section callbacks
+function marcs_cwf_theme_section_cb() { echo '<p>Set the theme color used by modern browsers for UI elements.</p>'; }
+function marcs_cwf_comment_section_cb() { echo '<p>Configure how comments behave on your website.</p>'; }
+function marcs_cwf_advanced_section_cb() { echo '<p>Configure advanced settings to improve security or adjust site functionality.</p>'; }
+function marcs_cwf_updates_section_cb() { echo '<p>Control update notification emails. Disable specific emails here.</p>'; }
+function marcs_cwf_site_health_section_cb() { echo '<p>Control which Site Health tests are disabled.</p>'; }
 
+// Field callbacks
 function marcs_cwf_theme_color_field_cb() {
     $theme_color = get_option('marcs_cwf_theme_color', '#db5945');
     echo '<input type="text" name="marcs_cwf_theme_color" value="' . esc_attr($theme_color) . '" class="regular-text" />';
-    echo '<p class="description">Enter a valid hex color code (e.g. #db5945).</p>';
-}
-
-function marcs_cwf_comment_section_cb() {
-    echo '<p>Configure how comments behave on your website.</p>';
 }
 
 function marcs_cwf_disable_comments_field_cb() {
     $disable_comments = get_option('marcs_cwf_disable_comments', 0);
     ?>
     <fieldset>
-        <label>
-            <input type="radio" name="marcs_cwf_disable_comments" value="0" <?php checked($disable_comments, 0); ?>>
-            Remove only the URL field from the comment form.
-        </label><br>
-        <label>
-            <input type="radio" name="marcs_cwf_disable_comments" value="1" <?php checked($disable_comments, 1); ?>>
-            Disable all comments entirely (Code sourced from WPBeginner).
-        </label>
+        <label><input type="radio" name="marcs_cwf_disable_comments" value="0" <?php checked($disable_comments, 0); ?>> Remove only the URL field.</label><br>
+        <label><input type="radio" name="marcs_cwf_disable_comments" value="1" <?php checked($disable_comments, 1); ?>> Disable all comments entirely.</label>
     </fieldset>
     <?php
-}
-
-function marcs_cwf_advanced_section_cb() {
-    echo '<p>Configure advanced settings to improve security or adjust site functionality.</p>';
 }
 
 function marcs_cwf_disable_xmlrpc_field_cb() {
-    $disable_xmlrpc = get_option('marcs_cwf_disable_xmlrpc', 0);
-    ?>
-    <fieldset>
-        <label>
-            <input type="checkbox" name="marcs_cwf_disable_xmlrpc" value="1" <?php checked($disable_xmlrpc, 1); ?>>
-            Disable XML-RPC (recommended for improved security if not needed)
-        </label>
-    </fieldset>
-    <?php
+    $value = get_option('marcs_cwf_disable_xmlrpc', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_xmlrpc" value="1" ' . checked(1, $value, false) . '> Disable XML-RPC';
 }
 
-function marcs_cwf_updates_section_cb() {
-    echo '<p>Control update notification emails. If you don\'t want to receive certain update emails, disable them here.</p>';
-}
-
+// Update email fields
 function marcs_cwf_disable_core_update_emails_field_cb() {
-    $disable_core = get_option('marcs_cwf_disable_core_update_emails', 0);
-    ?>
-    <fieldset>
-        <label>
-            <input type="checkbox" name="marcs_cwf_disable_core_update_emails" value="1" <?php checked($disable_core, 1); ?>>
-            Disable Core Update Success Emails
-        </label>
-    </fieldset>
-    <?php
+    $v = get_option('marcs_cwf_disable_core_update_emails', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_core_update_emails" value="1" ' . checked(1, $v, false) . '> Disable Core Update Success Emails';
 }
-
 function marcs_cwf_disable_plugin_update_emails_field_cb() {
-    $disable_plugin = get_option('marcs_cwf_disable_plugin_update_emails', 0);
-    ?>
-    <fieldset>
-        <label>
-            <input type="checkbox" name="marcs_cwf_disable_plugin_update_emails" value="1" <?php checked($disable_plugin, 1); ?>>
-            Disable Plugin Update Emails
-        </label>
-    </fieldset>
-    <?php
+    $v = get_option('marcs_cwf_disable_plugin_update_emails', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_plugin_update_emails" value="1" ' . checked(1, $v, false) . '> Disable Plugin Update Emails';
 }
-
 function marcs_cwf_disable_theme_update_emails_field_cb() {
-    $disable_theme = get_option('marcs_cwf_disable_theme_update_emails', 0);
-    ?>
-    <fieldset>
-        <label>
-            <input type="checkbox" name="marcs_cwf_disable_theme_update_emails" value="1" <?php checked($disable_theme, 1); ?>>
-            Disable Theme Update Emails
-        </label>
-    </fieldset>
-    <?php
+    $v = get_option('marcs_cwf_disable_theme_update_emails', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_theme_update_emails" value="1" ' . checked(1, $v, false) . '> Disable Theme Update Emails';
 }
 
+// 🆕 Site Health fields
+function marcs_cwf_disable_php_version_test_field_cb() {
+    $v = get_option('marcs_cwf_disable_php_version_test', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_php_version_test" value="1" ' . checked(1, $v, false) . '> Disable PHP Version Test';
+}
+function marcs_cwf_disable_theme_version_test_field_cb() {
+    $v = get_option('marcs_cwf_disable_theme_version_test', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_theme_version_test" value="1" ' . checked(1, $v, false) . '> Disable Theme Version Test';
+}
+function marcs_cwf_disable_https_status_test_field_cb() {
+    $v = get_option('marcs_cwf_disable_https_status_test', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_https_status_test" value="1" ' . checked(1, $v, false) . '> Disable HTTPS Status Test';
+}
+function marcs_cwf_disable_background_updates_test_field_cb() {
+    $v = get_option('marcs_cwf_disable_background_updates_test', 0);
+    echo '<input type="checkbox" name="marcs_cwf_disable_background_updates_test" value="1" ' . checked(1, $v, false) . '> Disable Background Updates Test';
+}
+
+// Page output
 function marcs_cwf_settings_page_html() {
-    if (!current_user_can('manage_options')) {
-        return;
-    }
+    if (!current_user_can('manage_options')) return;
     ?>
     <div class="wrap">
         <h1>Marc's Custom WP Functions Settings</h1>

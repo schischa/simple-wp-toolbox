@@ -14,6 +14,7 @@
 - **Disable XML-RPC**: Improve security by disabling XML-RPC if not needed.
 - **Disable Update Notification Emails**: Selectively disable emails for core updates, plugin updates, and theme updates.
 - **Dedicated Settings Page**: Manage all these settings under **Settings > Marc's Custom WP Functions**.
+- **Site Health Controls (new in v1.7.0)**: Disable individual Site Health tests directly from the plugin settings page.
 
 ## Installation
 
@@ -35,6 +36,14 @@
 - Extend functionality by adding new files in the `inc` directory.
 
 ## Changelog
+
+**1.7.0**
+- Added new Site Health control options to disable specific tests (like PHP version and theme version).
+- Improved admin bar “Howdy” replacement — now runs only for English locales and avoids PHP warnings.
+- Minor code cleanup and consistency updates.
+
+**1.6.1:**
+- Improvement: "Howdy" is now only replaced with "Hello" for English admin locales (e.g., en_US), allowing localized greetings in other languages (e.g., WPML)
 
 **Version 1.6:**
 - Added the option to selectively disable update notification emails for core, plugin, and theme updates.

@@ -4,7 +4,7 @@
  * Description: A simple plugin to handle custom WordPress functions without a child theme.
  * Author URI: https://chiroiu.com
  * Plugin URI: https://github.com/schischa/marcs-custom-wp-functions
- * Version: 1.6.1
+ * Version: 1.7.0
  * Author: Marc Chiroiu
  * License: GPL2
  */
@@ -21,6 +21,8 @@ require_once plugin_dir_path(__FILE__) . 'inc/theme-color.php';
 require_once plugin_dir_path(__FILE__) . 'inc/xmlrpc.php';
 require_once plugin_dir_path(__FILE__) . 'inc/updates.php';
 require_once plugin_dir_path(__FILE__) . 'inc/settings-page.php';
+require_once plugin_dir_path(__FILE__) . 'inc/site-health.php';
+
 
 // Set default options on plugin activation
 function marcs_cwf_set_default_options() {
