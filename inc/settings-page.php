@@ -70,6 +70,13 @@ function marcs_cwf_register_settings() {
         'default'           => 0,
     ));
 
+    // Dashboard Widget Settings
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_enable_dashboard_widget', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 0,
+    ));
+
     // Sections
     add_settings_section(
         'marcs_cwf_theme_section',
@@ -139,6 +146,22 @@ function marcs_cwf_register_settings() {
         'marcs_cwf_disable_theme_update_emails_field_cb',
         'marcs_cwf_settings_group',
         'marcs_cwf_updates_section'
+    );
+
+    // Dashboard Widget Section
+    add_settings_section(
+        'marcs_cwf_dashboard_section',
+        'Dashboard Widget',
+        'marcs_cwf_dashboard_section_cb',
+        'marcs_cwf_settings_group'
+    );
+
+    add_settings_field(
+        'marcs_cwf_enable_dashboard_widget_field',
+        'System Information',
+        'marcs_cwf_enable_dashboard_widget_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_dashboard_section'
     );
 
     // 🆕 Site Health Section
@@ -236,6 +259,29 @@ function marcs_cwf_disable_https_status_test_field_cb() {
 function marcs_cwf_disable_background_updates_test_field_cb() {
     $v = get_option('marcs_cwf_disable_background_updates_test', 0);
     echo '<input type="checkbox" name="marcs_cwf_disable_background_updates_test" value="1" ' . checked(1, $v, false) . '> Disable Background Updates Test';
+}
+
+// Dashboard Widget callbacks
+function marcs_cwf_dashboard_section_cb() {
+    echo '<p>Display basic WordPress and server information on the admin dashboard.</p>';
+}
+
+function marcs_cwf_enable_dashboard_widget_field_cb() {
+    $enabled = get_option('marcs_cwf_enable_dashboard_widget', 0);
+    ?>
+    <fieldset>
+        <input type="hidden" name="marcs_cwf_enable_dashboard_widget" value="0">
+        <label>
+            <input
+                type="checkbox"
+                name="marcs_cwf_enable_dashboard_widget"
+                value="1"
+                <?php checked(1, $enabled); ?>
+            >
+            Enable System Information Dashboard Widget
+        </label>
+    </fieldset>
+    <?php
 }
 
 // Page output

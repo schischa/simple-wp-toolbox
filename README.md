@@ -5,6 +5,7 @@
 **Marc's Custom WP Functions Plugin** helps you centralize common WordPress customizations and provides a settings page for configuration. Your modifications persist through theme updates, allowing for easy, code-free adjustments.
 
 ### Key Features
+- **System Information Dashboard Widget**: Optional dashboard widget displaying WordPress, PHP and database versions, memory consumption, PHP configuration and other useful server information. Disabled by default and configurable via the plugin settings.
 - **Comment Settings**: Remove only the comment URL field or disable comments entirely (code sourced from [WPBeginner](https://www.wpbeginner.com/)).
 - **Disable Emojis**: For GDPR compliance and improved performance.
 - **Remove WordPress Logo in Admin Bar**: Create a cleaner, more professional admin interface.
@@ -36,6 +37,13 @@
 - Extend functionality by adding new files in the `inc` directory.
 
 ## Changelog
+
+**Version 1.8.0:**
+- Added optional System Information Dashboard Widget.
+- Displays WordPress, PHP and database versions.
+- Shows current and peak PHP memory consumption, memory limit and usage percentage.
+- Displays active theme, web server, PHP execution time and upload limit.
+- Widget is disabled by default and can be enabled via plugin settings.
 
 **1.7.0**
 - Added new Site Health control options to disable specific tests (like PHP version and theme version).
