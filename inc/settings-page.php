@@ -77,6 +77,26 @@ function marcs_cwf_register_settings() {
         'default'           => 0,
     ));
 
+    register_setting('marcs_cwf_settings_group', 'marcs_cwf_enable_login_limiter', array(
+        'type'              => 'boolean',
+        'sanitize_callback' => 'absint',
+        'default'           => 1,
+    ));
+
+    add_settings_section(
+        'marcs_cwf_login_security_section',
+        'Login Security',
+        'marcs_cwf_login_security_section_cb',
+        'marcs_cwf_settings_group'
+    );
+    add_settings_field(
+        'marcs_cwf_enable_login_limiter_field',
+        'Login Limiter',
+        'marcs_cwf_enable_login_limiter_field_cb',
+        'marcs_cwf_settings_group',
+        'marcs_cwf_login_security_section'
+    );
+
     // Sections
     add_settings_section(
         'marcs_cwf_theme_section',
@@ -207,6 +227,7 @@ function marcs_cwf_comment_section_cb() { echo '<p>Configure how comments behave
 function marcs_cwf_advanced_section_cb() { echo '<p>Configure advanced settings to improve security or adjust site functionality.</p>'; }
 function marcs_cwf_updates_section_cb() { echo '<p>Control update notification emails. Disable specific emails here.</p>'; }
 function marcs_cwf_site_health_section_cb() { echo '<p>Control which Site Health tests are disabled.</p>'; }
+function marcs_cwf_login_security_section_cb() { echo '<p>Limit repeated failed login attempts.</p>'; }
 
 // Field callbacks
 function marcs_cwf_theme_color_field_cb() {
@@ -284,12 +305,42 @@ function marcs_cwf_enable_dashboard_widget_field_cb() {
     <?php
 }
 
+function marcs_cwf_enable_login_limiter_field_cb() {
+    $enabled = get_option('marcs_cwf_enable_login_limiter', 1);
+    $reset_url = wp_nonce_url(
+        admin_url('admin-post.php?action=marcs_cwf_login_limiter_reset'),
+        'marcs_cwf_login_limiter_reset'
+    );
+    ?>
+    <fieldset>
+        <input type="hidden" name="marcs_cwf_enable_login_limiter" value="0">
+        <label>
+            <input
+                type="checkbox"
+                name="marcs_cwf_enable_login_limiter"
+                value="1"
+                <?php checked(1, $enabled); ?>
+            >
+            Enable the login limiter (4 failed attempts, 24-hour IP lockout)
+        </label>
+        <p>
+            <a class="button button-secondary" href="<?php echo esc_url($reset_url); ?>">
+                <?php esc_html_e('Reset Login Lockouts', 'marcs-custom-wp-functions'); ?>
+            </a>
+        </p>
+    </fieldset>
+    <?php
+}
+
 // Page output
 function marcs_cwf_settings_page_html() {
     if (!current_user_can('manage_options')) return;
     ?>
     <div class="wrap">
         <h1>Marc's Custom WP Functions Settings</h1>
+        <?php if (isset($_GET['login_limiter_reset']) && '1' === $_GET['login_limiter_reset']) : ?>
+            <div class="notice notice-success is-dismissible"><p><?php esc_html_e('All login attempts and lockouts have been reset.', 'marcs-custom-wp-functions'); ?></p></div>
+        <?php endif; ?>
         <form method="post" action="options.php">
             <?php
             settings_fields('marcs_cwf_settings_group');

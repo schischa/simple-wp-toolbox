@@ -12,6 +12,7 @@
 - **Change "Howdy" to "Hello"**: More user-friendly greeting in the admin bar.
 - **Theme-Color Meta Tag**: Easily set a custom theme color for modern browsers.
 - **White-Label the Login Page**: Use your site's custom logo on the login screen.
+- **Login Limiter**: Enabled by default; can be disabled in the settings. Blocks an IP address for 24 hours after four failed login attempts, with a settings button to reset all attempts and lockouts.
 - **Disable XML-RPC**: Improve security by disabling XML-RPC if not needed.
 - **Disable Update Notification Emails**: Selectively disable emails for core updates, plugin updates, and theme updates.
 - **Dedicated Settings Page**: Manage all these settings under **Settings > Marc's Custom WP Functions**.
@@ -37,6 +38,13 @@
 - Extend functionality by adding new files in the `inc` directory.
 
 ## Changelog
+
+**Version 1.9.1:**
+- Added a settings button to reset all recorded login attempts and active IP lockouts.
+
+**Version 1.9.0:**
+- Added a simple login limiter that blocks an IP address for 24 hours after four failed attempts.
+- Added a settings control to enable or disable the login limiter.
 
 **Version 1.8.0:**
 - Added optional System Information Dashboard Widget.
