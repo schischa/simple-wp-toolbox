@@ -12,7 +12,7 @@
 - **Change "Howdy" to "Hello"**: More user-friendly greeting in the admin bar.
 - **Theme-Color Meta Tag**: Easily set a custom theme color for modern browsers.
 - **White-Label the Login Page**: Use your site's custom logo on the login screen.
-- **Login Limiter**: Enabled by default; can be disabled in the settings. Blocks an IP address for 24 hours after four failed login attempts, with a settings button to reset all attempts and lockouts.
+- **Login Limiter**: Enabled by default; can be disabled in the settings. Blocks an IP address for 24 hours after four failed login attempts, with a settings button to reset all attempts and lockouts. Login checks use an indexed database lookup for the current IP instead of scanning a list of IPs.
 - **Disable XML-RPC**: Improve security by disabling XML-RPC if not needed.
 - **Disable Update Notification Emails**: Selectively disable emails for core updates, plugin updates, and theme updates.
 - **Dedicated Settings Page**: Manage all these settings under **Settings > Marc's Custom WP Functions**.
@@ -31,6 +31,13 @@
   - Set the theme-color.
   - Disable XML-RPC if desired.
   - Control which update notification emails to disable.
+  - Enable or disable the login limiter and reset its attempt counters and active lockouts.
+
+### Login Limiter
+
+The login limiter is enabled by default. It counts failed attempts from each IP address during a 24-hour period and blocks that IP for 24 hours after the fourth failure. A successful login clears that IP's failed-attempt counter.
+
+Attempts and lockouts are stored in a dedicated database table. Each login checks only the current IP's hashed key through the table's primary index; it does not scan all recorded IP addresses. This keeps lookup work independent of how many other IPs have attempted to log in. Expired records are scheduled for daily cleanup through WordPress Cron. The settings page includes a button to clear all counters and lockouts immediately.
 
 ## Customization
 
@@ -38,6 +45,10 @@
 - Extend functionality by adding new files in the `inc` directory.
 
 ## Changelog
+
+**Version 1.9.2:**
+- Stores login limiter data in a dedicated database table and migrates active limiter data from the previous transient storage.
+- Uses an indexed lookup for the current IP rather than scanning a list of tracked IPs during login checks.
 
 **Version 1.9.1:**
 - Added a settings button to reset all recorded login attempts and active IP lockouts.

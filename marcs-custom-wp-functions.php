@@ -4,7 +4,7 @@
  * Description: A simple plugin to handle custom WordPress functions without a child theme.
  * Author URI: https://chiroiu.com
  * Plugin URI: https://github.com/schischa/marcs-custom-wp-functions
- * Version: 1.9.1
+ * Version: 1.9.2
  * Author: Marc Chiroiu
  * License: GPL2
  */
@@ -51,5 +51,7 @@ function marcs_cwf_set_default_options() {
     if (get_option('marcs_cwf_enable_login_limiter') === false) {
         add_option('marcs_cwf_enable_login_limiter', 1);
     }
+    marcs_cwf_login_limiter_maybe_create_table();
 }
 register_activation_hook(__FILE__, 'marcs_cwf_set_default_options');
+register_deactivation_hook(__FILE__, 'marcs_cwf_login_limiter_deactivate');

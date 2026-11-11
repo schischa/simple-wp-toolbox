@@ -5,6 +5,114 @@
 
 define('MARCS_CWF_LOGIN_LIMIT', 4);
 define('MARCS_CWF_LOGIN_LIMIT_WINDOW', DAY_IN_SECONDS);
+define('MARCS_CWF_LOGIN_LIMIT_DB_VERSION', '1.0');
+
+/**
+ * Get the name of the login limiter database table.
+ *
+ * @return string
+ */
+function marcs_cwf_login_limiter_get_table_name() {
+    global $wpdb;
+
+    return $wpdb->prefix . 'marcs_cwf_login_limits';
+}
+
+/**
+ * Create or upgrade the login limiter table and migrate active transient data.
+ */
+function marcs_cwf_login_limiter_maybe_create_table() {
+    global $wpdb;
+
+    if (get_option('marcs_cwf_login_limiter_db_version') === MARCS_CWF_LOGIN_LIMIT_DB_VERSION) {
+        if (!wp_next_scheduled('marcs_cwf_login_limiter_cleanup')) {
+            wp_schedule_event(time() + DAY_IN_SECONDS, 'daily', 'marcs_cwf_login_limiter_cleanup');
+        }
+        return;
+    }
+
+    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+    $table_name      = marcs_cwf_login_limiter_get_table_name();
+    $charset_collate = $wpdb->get_charset_collate();
+    $sql             = "CREATE TABLE {$table_name} (
+        ip_hash char(32) NOT NULL,
+        attempts smallint(5) unsigned NOT NULL DEFAULT 0,
+        attempts_expires bigint(20) unsigned NOT NULL DEFAULT 0,
+        locked_until bigint(20) unsigned NOT NULL DEFAULT 0,
+        PRIMARY KEY  (ip_hash),
+        KEY attempts_expires (attempts_expires),
+        KEY locked_until (locked_until)
+    ) {$charset_collate};";
+
+    dbDelta($sql);
+
+    $existing_table = $wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $wpdb->esc_like($table_name)));
+
+    if ($existing_table !== $table_name) {
+        return;
+    }
+
+    marcs_cwf_login_limiter_migrate_transients($table_name);
+    update_option('marcs_cwf_login_limiter_db_version', MARCS_CWF_LOGIN_LIMIT_DB_VERSION, false);
+
+    if (!wp_next_scheduled('marcs_cwf_login_limiter_cleanup')) {
+        wp_schedule_event(time() + DAY_IN_SECONDS, 'daily', 'marcs_cwf_login_limiter_cleanup');
+    }
+}
+add_action('plugins_loaded', 'marcs_cwf_login_limiter_maybe_create_table', 20);
+
+/**
+ * Migrate active login limiter data from the previous transient storage.
+ *
+ * @param string $table_name Login limiter table name.
+ */
+function marcs_cwf_login_limiter_migrate_transients($table_name) {
+    global $wpdb;
+
+    $tracked_ips = get_option('marcs_cwf_login_limiter_ips', array());
+
+    if (!is_array($tracked_ips)) {
+        return;
+    }
+
+    $now = time();
+
+    foreach ($tracked_ips as $ip_hash) {
+        if (!preg_match('/^[a-f0-9]{32}$/', $ip_hash)) {
+            continue;
+        }
+
+        $attempts = get_transient('marcs_cwf_login_attempts_' . $ip_hash);
+        $locked   = get_transient('marcs_cwf_login_lockout_' . $ip_hash);
+
+        if ($attempts === false && $locked === false) {
+            continue;
+        }
+
+        $attempt_count   = $attempts === false ? 0 : absint($attempts);
+        $attempts_expiry = $attempts === false ? 0 : $now + MARCS_CWF_LOGIN_LIMIT_WINDOW;
+        $locked_until    = $locked === false ? 0 : $now + MARCS_CWF_LOGIN_LIMIT_WINDOW;
+
+        $result = $wpdb->insert(
+            $table_name,
+            array(
+                'ip_hash'          => $ip_hash,
+                'attempts'         => $attempt_count,
+                'attempts_expires' => $attempts_expiry,
+                'locked_until'     => $locked_until,
+            ),
+            array('%s', '%d', '%d', '%d')
+        );
+
+        if ($result !== false) {
+            delete_transient('marcs_cwf_login_attempts_' . $ip_hash);
+            delete_transient('marcs_cwf_login_lockout_' . $ip_hash);
+        }
+    }
+
+    delete_option('marcs_cwf_login_limiter_ips');
+}
 
 /**
  * Get the IP address of the current request.
@@ -28,51 +136,20 @@ function marcs_cwf_login_limiter_get_ip() {
 }
 
 /**
- * Build a transient key for the given login limiter data and IP address.
- *
- * @param string $type Data type, either attempts or lockout.
- * @param string $ip_address IP address.
- * @return string
- */
-function marcs_cwf_login_limiter_get_key($type, $ip_address) {
-    return 'marcs_cwf_login_' . $type . '_' . md5($ip_address);
-}
-
-/**
- * Track an IP hash while it has outstanding attempts or an active lockout.
+ * Get the stored lockout expiration for an IP address.
  *
  * @param string $ip_address IP address.
+ * @return int
  */
-function marcs_cwf_login_limiter_track_ip($ip_address) {
-    $ip_hash = md5($ip_address);
-    $tracked_ips = get_option('marcs_cwf_login_limiter_ips', array());
+function marcs_cwf_login_limiter_get_lockout($ip_address) {
+    global $wpdb;
 
-    if (!is_array($tracked_ips)) {
-        $tracked_ips = array();
-    }
+    $locked_until = $wpdb->get_var($wpdb->prepare(
+        'SELECT locked_until FROM ' . marcs_cwf_login_limiter_get_table_name() . ' WHERE ip_hash = %s',
+        md5($ip_address)
+    ));
 
-    $tracked_ips = array_filter($tracked_ips, function ($tracked_hash) {
-        return get_transient('marcs_cwf_login_attempts_' . $tracked_hash) !== false
-            || get_transient('marcs_cwf_login_lockout_' . $tracked_hash) !== false;
-    });
-    $tracked_ips[] = $ip_hash;
-
-    update_option('marcs_cwf_login_limiter_ips', array_values(array_unique($tracked_ips)), false);
-}
-
-/**
- * Remove an IP hash from the tracking option when it has no active lockout.
- *
- * @param string $ip_address IP address.
- */
-function marcs_cwf_login_limiter_untrack_ip($ip_address) {
-    $ip_hash = md5($ip_address);
-    $tracked_ips = get_option('marcs_cwf_login_limiter_ips', array());
-
-    if (is_array($tracked_ips)) {
-        $tracked_ips = array_diff($tracked_ips, array($ip_hash));
-        update_option('marcs_cwf_login_limiter_ips', array_values($tracked_ips), false);
-    }
+    return (int) $locked_until;
 }
 
 /**
@@ -88,7 +165,7 @@ function marcs_cwf_login_limiter_check($user) {
 
     $ip_address = marcs_cwf_login_limiter_get_ip();
 
-    if (!$ip_address || get_transient(marcs_cwf_login_limiter_get_key('lockout', $ip_address)) === false) {
+    if (!$ip_address || marcs_cwf_login_limiter_get_lockout($ip_address) <= time()) {
         return $user;
     }
 
@@ -127,7 +204,7 @@ function marcs_cwf_login_limiter_show_lockout_error($errors) {
 
     $ip_address = marcs_cwf_login_limiter_get_ip();
 
-    if (!$ip_address || get_transient(marcs_cwf_login_limiter_get_key('lockout', $ip_address)) === false) {
+    if (!$ip_address || marcs_cwf_login_limiter_get_lockout($ip_address) <= time()) {
         return $errors;
     }
 
@@ -141,36 +218,40 @@ add_filter('login_errors', 'marcs_cwf_login_limiter_show_lockout_error');
  * @param string $username Submitted username.
  */
 function marcs_cwf_login_limiter_record_failure($username) {
+    global $wpdb;
+
     if (!get_option('marcs_cwf_enable_login_limiter', 1)) {
         return;
     }
 
     $ip_address = marcs_cwf_login_limiter_get_ip();
 
-    if (!$ip_address) {
+    if (!$ip_address || marcs_cwf_login_limiter_get_lockout($ip_address) > time()) {
         return;
     }
 
-    if (get_transient(marcs_cwf_login_limiter_get_key('lockout', $ip_address)) !== false) {
-        return;
-    }
+    $now             = time();
+    $attempts_expiry = $now + MARCS_CWF_LOGIN_LIMIT_WINDOW;
+    $locked_until    = $now + MARCS_CWF_LOGIN_LIMIT_WINDOW;
+    $table_name      = marcs_cwf_login_limiter_get_table_name();
 
-    $attempts_key = marcs_cwf_login_limiter_get_key('attempts', $ip_address);
-    $attempts = (int) get_transient($attempts_key) + 1;
-
-    if ($attempts >= MARCS_CWF_LOGIN_LIMIT) {
-        delete_transient($attempts_key);
-        set_transient(
-            marcs_cwf_login_limiter_get_key('lockout', $ip_address),
-            1,
-            MARCS_CWF_LOGIN_LIMIT_WINDOW
-        );
-        marcs_cwf_login_limiter_track_ip($ip_address);
-        return;
-    }
-
-    set_transient($attempts_key, $attempts, MARCS_CWF_LOGIN_LIMIT_WINDOW);
-    marcs_cwf_login_limiter_track_ip($ip_address);
+    $wpdb->query($wpdb->prepare(
+        "INSERT INTO {$table_name} (ip_hash, attempts, attempts_expires, locked_until)
+        VALUES (%s, 1, %d, 0)
+        ON DUPLICATE KEY UPDATE
+            locked_until = IF(locked_until > %d, locked_until, IF(attempts_expires <= %d, 0, IF(attempts + 1 >= %d, %d, 0))),
+            attempts = IF(attempts_expires <= %d, 1, attempts + 1),
+            attempts_expires = IF(attempts_expires <= %d, %d, attempts_expires)",
+        md5($ip_address),
+        $attempts_expiry,
+        $now,
+        $now,
+        MARCS_CWF_LOGIN_LIMIT,
+        $locked_until,
+        $now,
+        $now,
+        $attempts_expiry
+    ));
 }
 add_action('wp_login_failed', 'marcs_cwf_login_limiter_record_failure', 1);
 
@@ -181,63 +262,59 @@ add_action('wp_login_failed', 'marcs_cwf_login_limiter_record_failure', 1);
  * @param WP_User $user       Authenticated user.
  */
 function marcs_cwf_login_limiter_clear_attempts($user_login, $user) {
+    global $wpdb;
+
     $ip_address = marcs_cwf_login_limiter_get_ip();
 
     if ($ip_address) {
-        delete_transient(marcs_cwf_login_limiter_get_key('attempts', $ip_address));
-
-        if (get_transient(marcs_cwf_login_limiter_get_key('lockout', $ip_address)) === false) {
-            marcs_cwf_login_limiter_untrack_ip($ip_address);
-        }
+        $wpdb->delete(
+            marcs_cwf_login_limiter_get_table_name(),
+            array('ip_hash' => md5($ip_address)),
+            array('%s')
+        );
     }
 }
 add_action('wp_login', 'marcs_cwf_login_limiter_clear_attempts', 10, 2);
 
 /**
- * Reset all tracked login attempts and lockouts.
+ * Remove expired attempt and lockout records.
+ */
+function marcs_cwf_login_limiter_cleanup() {
+    global $wpdb;
+
+    $now = time();
+    $wpdb->query($wpdb->prepare(
+        'DELETE FROM ' . marcs_cwf_login_limiter_get_table_name() . ' WHERE attempts_expires <= %d AND locked_until <= %d',
+        $now,
+        $now
+    ));
+}
+add_action('marcs_cwf_login_limiter_cleanup', 'marcs_cwf_login_limiter_cleanup');
+
+/**
+ * Unschedule login limiter cleanup when the plugin is deactivated.
+ */
+function marcs_cwf_login_limiter_deactivate() {
+    wp_clear_scheduled_hook('marcs_cwf_login_limiter_cleanup');
+}
+
+/**
+ * Reset all login attempts and lockouts.
  */
 function marcs_cwf_login_limiter_reset() {
+    global $wpdb;
+
     if (!current_user_can('manage_options')) {
         wp_die(esc_html__('You are not allowed to reset login lockouts.', 'marcs-custom-wp-functions'));
     }
 
     check_admin_referer('marcs_cwf_login_limiter_reset');
-
-    $transient_names = array();
-    $tracked_ips = get_option('marcs_cwf_login_limiter_ips', array());
-
-    if (is_array($tracked_ips)) {
-        foreach ($tracked_ips as $ip_hash) {
-            if (preg_match('/^[a-f0-9]{32}$/', $ip_hash)) {
-                $transient_names[] = 'marcs_cwf_login_attempts_' . $ip_hash;
-                $transient_names[] = 'marcs_cwf_login_lockout_' . $ip_hash;
-            }
-        }
-    }
-
-    global $wpdb;
-    $like = $wpdb->esc_like('_transient_marcs_cwf_login_') . '%';
-    $stored_transients = $wpdb->get_col($wpdb->prepare(
-        "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
-        $like
-    ));
-
-    foreach ($stored_transients as $option_name) {
-        if (preg_match('/^_transient_(marcs_cwf_login_(?:attempts|lockout)_[a-f0-9]{32})$/', $option_name, $matches)) {
-            $transient_names[] = $matches[1];
-        }
-    }
-
-    foreach (array_unique($transient_names) as $transient_name) {
-        delete_transient($transient_name);
-    }
-
-    delete_option('marcs_cwf_login_limiter_ips');
+    $wpdb->query('TRUNCATE TABLE ' . marcs_cwf_login_limiter_get_table_name());
 
     wp_safe_redirect(add_query_arg(
         array(
-            'page'                     => 'marcs-custom-wp-functions',
-            'login_limiter_reset'      => '1',
+            'page'                => 'marcs-custom-wp-functions',
+            'login_limiter_reset' => '1',
         ),
         admin_url('options-general.php')
     ));
