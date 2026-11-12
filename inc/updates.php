@@ -7,12 +7,14 @@ $disable_theme_update_emails  = get_option('simple_wp_toolbox_disable_theme_upda
 if ($disable_core_update_emails) {
     // Disable core update emails (only success emails as per given code)
     add_filter('auto_core_update_send_email', 'simple_wp_toolbox_stop_core_update_emails', 10, 4);
-    function simple_wp_toolbox_stop_core_update_emails($send, $type, $core_update, $result) {
-        if (!empty($type) && $type == 'success') {
-            return false;
-        }
-        return true;
+}
+
+function simple_wp_toolbox_stop_core_update_emails($send, $type, $core_update, $result) {
+    if ('success' === $type) {
+        return false;
     }
+
+    return $send;
 }
 
 if ($disable_plugin_update_emails) {

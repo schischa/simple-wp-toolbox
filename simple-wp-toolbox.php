@@ -5,9 +5,12 @@
  * Author URI: https://chiroiu.com
  * Plugin URI: https://github.com/schischa/simple-wp-toolbox
  * Version: 1.9.3
+ * Requires at least: 5.2
+ * Requires PHP: 7.0
  * Text Domain: simple-wp-toolbox
  * Author: Marc Chiroiu
  * License: GPL2
+ * License URI: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
  */
 
 if (!defined('WPINC')) {

@@ -295,8 +295,31 @@ add_action('simple_wp_toolbox_login_limiter_cleanup', 'simple_wp_toolbox_login_l
  * Unschedule login limiter cleanup when the plugin is deactivated.
  */
 function simple_wp_toolbox_login_limiter_deactivate() {
+    global $wpdb;
+
     wp_clear_scheduled_hook('simple_wp_toolbox_login_limiter_cleanup');
+    $wpdb->query('DELETE FROM ' . simple_wp_toolbox_login_limiter_get_table_name());
 }
+
+/**
+ * Add suggested privacy policy text describing locally stored login limiter data.
+ */
+function simple_wp_toolbox_login_limiter_add_privacy_policy_content() {
+    if (!function_exists('wp_add_privacy_policy_content')) {
+        return;
+    }
+
+    $content = '<p>' . esc_html__(
+        'Simple WP Toolbox stores a hash of the visitor IP address, failed login attempt count, and attempt and lockout expiration timestamps in this site’s database to enforce temporary login lockouts. It does not store login names or passwords and does not send this information to an external service. Records become eligible for deletion after 24 hours and are removed by the daily cleanup task; records for an IP address are also cleared after a successful login or when the plugin is deactivated. Deleting the plugin removes the login limiter table.',
+        'simple-wp-toolbox'
+    ) . '</p>';
+
+    wp_add_privacy_policy_content(
+        esc_html__('Simple WP Toolbox Login Limiter', 'simple-wp-toolbox'),
+        wp_kses_post($content)
+    );
+}
+add_action('admin_init', 'simple_wp_toolbox_login_limiter_add_privacy_policy_content');
 
 /**
  * Reset all login attempts and lockouts.

@@ -6,8 +6,8 @@
 
 ### Key Features
 - **System Information Dashboard Widget**: Optional dashboard widget displaying WordPress, PHP and database versions, memory consumption, PHP configuration and other useful server information. Disabled by default and configurable via the plugin settings.
-- **Comment Settings**: Remove only the comment URL field or disable comments entirely (code sourced from [WPBeginner](https://www.wpbeginner.com/)).
-- **Disable Emojis**: For GDPR compliance and improved performance.
+- **Comment Settings**: Remove only the comment URL field or disable comments entirely.
+- **Disable Emojis**: Disable WordPress emoji scripts and styles, which may reduce front-end assets.
 - **Remove WordPress Logo in Admin Bar**: Create a cleaner, more professional admin interface.
 - **Change "Howdy" to "Hello"**: More user-friendly greeting in the admin bar.
 - **Theme-Color Meta Tag**: Easily set a custom theme color for modern browsers.
@@ -48,6 +48,10 @@ Attempts and lockouts are stored in a dedicated database table. Each login check
 
 **Version 1.9.3:**
 - Renamed the plugin to Simple WP Toolbox and changed its code, option, hook and database table prefixes to `simple_wp_toolbox_`.
+- Corrected Settings page checkbox handling and Site Health test controls.
+- Added login limiter privacy information and cleanup on plugin removal.
+- Preserved the original core update email filter value for email types the setting does not change.
+- Prefixed remaining plugin functions and prepared admin interface text for translation.
 
 **Version 1.9.2:**
 - Stores login limiter data in a dedicated database table and migrates active limiter data from the previous transient storage.
@@ -85,7 +89,7 @@ Attempts and lockouts are stored in a dedicated database table. Each login check
 - Enhanced the "disable comments" option to fully remove the comment icon/count from the admin bar.
 
 **Version 1.4:**
-- Added a setting to choose between removing the comment URL field only or disabling comments entirely (code from WPBeginner).
+- Added a setting to choose between removing the comment URL field only or disabling comments entirely.
 
 **Version 1.3:**
 - Refactored code into separate files for better maintainability.
@@ -101,7 +105,7 @@ Attempts and lockouts are stored in a dedicated database table. Each login check
 
 ## License
 
-This plugin is licensed under GPL2.
+This plugin is licensed under GPL version 2.
 
 ## Author
 

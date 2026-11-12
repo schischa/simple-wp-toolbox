@@ -1,7 +1,7 @@
 <?php
 // Whitelabelling: Change login logo to website's custom logo (or default WP logo if none set)
-add_action('login_enqueue_scripts', 'custom_login_logo');
-function custom_login_logo() {
+add_action('login_enqueue_scripts', 'simple_wp_toolbox_login_logo');
+function simple_wp_toolbox_login_logo() {
     $custom_logo_id = get_theme_mod('custom_logo');
     $logo_url = wp_get_attachment_image_url($custom_logo_id, 'full');
 
@@ -21,13 +21,13 @@ function custom_login_logo() {
 }
 
 // Modify login logo link URL to point to site's homepage
-add_filter('login_headerurl', 'custom_login_logo_url');
-function custom_login_logo_url() {
+add_filter('login_headerurl', 'simple_wp_toolbox_login_logo_url');
+function simple_wp_toolbox_login_logo_url() {
     return home_url();
 }
 
 // Modify the login logo title attribute to the site's name
-add_filter('login_headertext', 'custom_login_logo_url_title');
-function custom_login_logo_url_title() {
+add_filter('login_headertext', 'simple_wp_toolbox_login_logo_url_title');
+function simple_wp_toolbox_login_logo_url_title() {
     return get_bloginfo('name');
 }

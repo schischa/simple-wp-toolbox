@@ -15,7 +15,7 @@ function simple_wp_toolbox_register_dashboard_widget() {
 
     wp_add_dashboard_widget(
         'simple_wp_toolbox_system_info',
-        'Simple WP Toolbox System Information',
+        __('Simple WP Toolbox System Information', 'simple-wp-toolbox'),
         'simple_wp_toolbox_dashboard_widget_html'
     );
 }
@@ -23,7 +23,7 @@ function simple_wp_toolbox_register_dashboard_widget() {
 // Format bytes into a human-readable value
 function simple_wp_toolbox_format_bytes($bytes) {
     if ($bytes === -1) {
-        return 'Unlimited';
+        return __('Unlimited', 'simple-wp-toolbox');
     }
 
     return size_format($bytes, 2);
@@ -45,31 +45,31 @@ function simple_wp_toolbox_dashboard_widget_html() {
     <table class="widefat striped">
         <tbody>
             <tr>
-                <td><strong>WordPress</strong></td>
+                <td><strong><?php esc_html_e('WordPress', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html(get_bloginfo('version')); ?></td>
             </tr>
             <tr>
-                <td><strong>PHP Version</strong></td>
+                <td><strong><?php esc_html_e('PHP Version', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html(PHP_VERSION); ?></td>
             </tr>
             <tr>
-                <td><strong>Database</strong></td>
+                <td><strong><?php esc_html_e('Database', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html($wpdb->db_version()); ?></td>
             </tr>
             <tr>
-                <td><strong>Memory Usage</strong></td>
+                <td><strong><?php esc_html_e('Memory Usage', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html(simple_wp_toolbox_format_bytes($memory_usage)); ?></td>
             </tr>
             <tr>
-                <td><strong>Peak Memory Usage</strong></td>
+                <td><strong><?php esc_html_e('Peak Memory Usage', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html(simple_wp_toolbox_format_bytes($memory_peak)); ?></td>
             </tr>
             <tr>
-                <td><strong>PHP Memory Limit</strong></td>
+                <td><strong><?php esc_html_e('PHP Memory Limit', 'simple-wp-toolbox'); ?></strong></td>
                 <td>
                     <?php
                     echo esc_html($memory_limit === '-1'
-                        ? 'Unlimited'
+                        ? __('Unlimited', 'simple-wp-toolbox')
                         : $memory_limit
                     );
                     ?>
@@ -77,7 +77,7 @@ function simple_wp_toolbox_dashboard_widget_html() {
             </tr>
             <?php if ($memory_limit_bytes > 0) : ?>
                 <tr>
-                    <td><strong>Memory Usage (%)</strong></td>
+                    <td><strong><?php esc_html_e('Memory Usage (%)', 'simple-wp-toolbox'); ?></strong></td>
                     <td>
                         <?php
                         echo esc_html(
@@ -88,7 +88,7 @@ function simple_wp_toolbox_dashboard_widget_html() {
                 </tr>
             <?php endif; ?>
             <tr>
-                <td><strong>Active Theme</strong></td>
+                <td><strong><?php esc_html_e('Active Theme', 'simple-wp-toolbox'); ?></strong></td>
                 <td>
                     <?php
                     echo esc_html($theme->get('Name') . ' ' . $theme->get('Version'));
@@ -96,20 +96,20 @@ function simple_wp_toolbox_dashboard_widget_html() {
                 </td>
             </tr>
             <tr>
-                <td><strong>Web Server</strong></td>
-                <td><?php echo esc_html($_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'); ?></td>
+                <td><strong><?php esc_html_e('Web Server', 'simple-wp-toolbox'); ?></strong></td>
+                <td><?php echo esc_html($_SERVER['SERVER_SOFTWARE'] ?? __('Unknown', 'simple-wp-toolbox')); ?></td>
             </tr>
             <tr>
-                <td><strong>Max Execution Time</strong></td>
-                <td><?php echo esc_html(ini_get('max_execution_time') . ' seconds'); ?></td>
+                <td><strong><?php esc_html_e('Max Execution Time', 'simple-wp-toolbox'); ?></strong></td>
+                <td><?php echo esc_html(sprintf(__('%s seconds', 'simple-wp-toolbox'), ini_get('max_execution_time'))); ?></td>
             </tr>
             <tr>
-                <td><strong>Upload Limit</strong></td>
+                <td><strong><?php esc_html_e('Upload Limit', 'simple-wp-toolbox'); ?></strong></td>
                 <td><?php echo esc_html(ini_get('upload_max_filesize')); ?></td>
             </tr>
             <tr>
-                <td><strong>Multisite</strong></td>
-                <td><?php echo is_multisite() ? 'Yes' : 'No'; ?></td>
+                <td><strong><?php esc_html_e('Multisite', 'simple-wp-toolbox'); ?></strong></td>
+                <td><?php echo is_multisite() ? esc_html__('Yes', 'simple-wp-toolbox') : esc_html__('No', 'simple-wp-toolbox'); ?></td>
             </tr>
         </tbody>
     </table>
