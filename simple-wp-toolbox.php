@@ -3,8 +3,8 @@
  * Plugin Name: Simple WP Toolbox
  * Description: A lightweight toolbox for useful WordPress enhancements and settings.
  * Author URI: https://chiroiu.com
- * Plugin URI: https://github.com/schischa/marcs-custom-wp-functions
- * Version: 1.9.2
+ * Plugin URI: https://github.com/schischa/simple-wp-toolbox
+ * Version: 1.9.3
  * Text Domain: simple-wp-toolbox
  * Author: Marc Chiroiu
  * License: GPL2

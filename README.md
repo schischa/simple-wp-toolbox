@@ -46,7 +46,7 @@ Attempts and lockouts are stored in a dedicated database table. Each login check
 
 ## Changelog
 
-**Unreleased:**
+**Version 1.9.3:**
 - Renamed the plugin to Simple WP Toolbox and changed its code, option, hook and database table prefixes to `simple_wp_toolbox_`.
 
 **Version 1.9.2:**
@@ -107,4 +107,4 @@ This plugin is licensed under GPL2.
 
 Marc Chiroiu  
 [Website](https://chiroiu.com)  
-[GitHub Repository](https://github.com/schischa/marcs-custom-wp-functions)
+[GitHub Repository](https://github.com/schischa/simple-wp-toolbox)
