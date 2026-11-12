@@ -1,8 +1,8 @@
-# Marc's Custom WP Functions Plugin
+# Simple WP Toolbox
 
 ## Description
 
-**Marc's Custom WP Functions Plugin** helps you centralize common WordPress customizations and provides a settings page for configuration. Your modifications persist through theme updates, allowing for easy, code-free adjustments.
+**Simple WP Toolbox** helps you centralize common WordPress customizations and provides a settings page for configuration. Your modifications persist through theme updates, allowing for easy, code-free adjustments.
 
 ### Key Features
 - **System Information Dashboard Widget**: Optional dashboard widget displaying WordPress, PHP and database versions, memory consumption, PHP configuration and other useful server information. Disabled by default and configurable via the plugin settings.
@@ -15,18 +15,18 @@
 - **Login Limiter**: Enabled by default; can be disabled in the settings. Blocks an IP address for 24 hours after four failed login attempts, with a settings button to reset all attempts and lockouts. Login checks use an indexed database lookup for the current IP instead of scanning a list of IPs.
 - **Disable XML-RPC**: Improve security by disabling XML-RPC if not needed.
 - **Disable Update Notification Emails**: Selectively disable emails for core updates, plugin updates, and theme updates.
-- **Dedicated Settings Page**: Manage all these settings under **Settings > Marc's Custom WP Functions**.
+- **Dedicated Settings Page**: Manage all these settings under **Settings > Simple WP Toolbox**.
 - **Site Health Controls (new in v1.7.0)**: Disable individual Site Health tests directly from the plugin settings page.
 
 ## Installation
 
 1. Download or clone the repository.
-2. Upload `marcs-custom-wp-functions` to `/wp-content/plugins/`.
-3. Activate **Marc's Custom WP Functions Plugin** in **Plugins > Installed Plugins**.
+2. Upload `simple-wp-toolbox` to `/wp-content/plugins/`.
+3. Activate **Simple WP Toolbox** in **Plugins > Installed Plugins**.
 
 ## Usage
 
-- After activation, visit **Settings > Marc's Custom WP Functions**:
+- After activation, visit **Settings > Simple WP Toolbox**:
   - Adjust comment behavior.
   - Set the theme-color.
   - Disable XML-RPC if desired.
@@ -45,6 +45,9 @@ Attempts and lockouts are stored in a dedicated database table. Each login check
 - Extend functionality by adding new files in the `inc` directory.
 
 ## Changelog
+
+**Unreleased:**
+- Renamed the plugin to Simple WP Toolbox and changed its code, option, hook and database table prefixes to `simple_wp_toolbox_`.
 
 **Version 1.9.2:**
 - Stores login limiter data in a dedicated database table and migrates active limiter data from the previous transient storage.

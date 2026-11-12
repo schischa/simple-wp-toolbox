@@ -1,10 +1,10 @@
 <?php
 // Register the dashboard widget if enabled
-add_action('wp_dashboard_setup', 'marcs_cwf_register_dashboard_widget');
+add_action('wp_dashboard_setup', 'simple_wp_toolbox_register_dashboard_widget');
 
-function marcs_cwf_register_dashboard_widget() {
+function simple_wp_toolbox_register_dashboard_widget() {
     // Only display the widget when explicitly enabled
-    if (!get_option('marcs_cwf_enable_dashboard_widget', 0)) {
+    if (!get_option('simple_wp_toolbox_enable_dashboard_widget', 0)) {
         return;
     }
 
@@ -14,14 +14,14 @@ function marcs_cwf_register_dashboard_widget() {
     }
 
     wp_add_dashboard_widget(
-        'marcs_cwf_system_info',
-        "Marc's System Information",
-        'marcs_cwf_dashboard_widget_html'
+        'simple_wp_toolbox_system_info',
+        'Simple WP Toolbox System Information',
+        'simple_wp_toolbox_dashboard_widget_html'
     );
 }
 
 // Format bytes into a human-readable value
-function marcs_cwf_format_bytes($bytes) {
+function simple_wp_toolbox_format_bytes($bytes) {
     if ($bytes === -1) {
         return 'Unlimited';
     }
@@ -30,7 +30,7 @@ function marcs_cwf_format_bytes($bytes) {
 }
 
 // Display system information
-function marcs_cwf_dashboard_widget_html() {
+function simple_wp_toolbox_dashboard_widget_html() {
     global $wpdb;
 
     $theme = wp_get_theme();
@@ -58,11 +58,11 @@ function marcs_cwf_dashboard_widget_html() {
             </tr>
             <tr>
                 <td><strong>Memory Usage</strong></td>
-                <td><?php echo esc_html(marcs_cwf_format_bytes($memory_usage)); ?></td>
+                <td><?php echo esc_html(simple_wp_toolbox_format_bytes($memory_usage)); ?></td>
             </tr>
             <tr>
                 <td><strong>Peak Memory Usage</strong></td>
-                <td><?php echo esc_html(marcs_cwf_format_bytes($memory_peak)); ?></td>
+                <td><?php echo esc_html(simple_wp_toolbox_format_bytes($memory_peak)); ?></td>
             </tr>
             <tr>
                 <td><strong>PHP Memory Limit</strong></td>

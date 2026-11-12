@@ -1,6 +1,6 @@
 <?php
 // Get user setting for comment behavior: 0 = remove URL field only, 1 = disable comments entirely
-$disable_comments = get_option('marcs_cwf_disable_comments', 0);
+$disable_comments = get_option('simple_wp_toolbox_disable_comments', 0);
 
 if ($disable_comments) {
     /**
@@ -50,8 +50,8 @@ if ($disable_comments) {
 
     // Ensure the comment icon is completely removed from the admin bar
     // by removing the comments node explicitly.
-    add_action('admin_bar_menu', 'marcs_cwf_remove_comments_icon', 999);
-    function marcs_cwf_remove_comments_icon($wp_admin_bar) {
+    add_action('admin_bar_menu', 'simple_wp_toolbox_remove_comments_icon', 999);
+    function simple_wp_toolbox_remove_comments_icon($wp_admin_bar) {
         $wp_admin_bar->remove_node('comments');
     }
 

@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-This repository contains "Marc's Custom WP Functions Plugin", a lightweight WordPress plugin that provides additional functionality without requiring a child theme.
+This repository contains "Simple WP Toolbox", a lightweight WordPress plugin that provides additional functionality without requiring a child theme.
 
 The plugin is maintained by Marc Chiroiu.
 
@@ -28,7 +28,7 @@ The primary goals are:
 
 ## Code Structure and Architecture
 
-- The main plugin file is `marcs-custom-wp-functions.php`.
+- The main plugin file is `simple-wp-toolbox.php`.
 - Individual features are organized in separate PHP files in the `inc/` directory.
 - New functionality should generally be implemented in a separate file under `inc/`.
 - Include new feature files from the main plugin file using `require_once`.
@@ -38,7 +38,7 @@ The primary goals are:
 
 ## Naming Conventions
 
-- Use the `marcs_cwf_` prefix for all new functions, options, hooks and other globally scoped identifiers.
+- Use the `simple_wp_toolbox_` prefix for all new functions, options, hooks and other globally scoped identifiers.
 - Preserve existing function names when modifying existing functionality, even if they use older naming conventions.
 - Use descriptive function and variable names.
 - Avoid generic function names that could conflict with WordPress core or other plugins.
@@ -50,7 +50,7 @@ The plugin uses individual WordPress options rather than a single settings array
 When adding new settings:
 
 - Follow the existing implementation in `inc/settings-page.php`.
-- Use individual options with the `marcs_cwf_` prefix.
+- Use individual options with the `simple_wp_toolbox_` prefix.
 - Register settings using the WordPress Settings API.
 - Use appropriate sanitization callbacks.
 - Provide sensible defaults.

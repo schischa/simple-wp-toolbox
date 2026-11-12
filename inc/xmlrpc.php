@@ -1,6 +1,6 @@
 <?php
 // Check if we should disable XML-RPC
-$disable_xmlrpc = get_option('marcs_cwf_disable_xmlrpc', 0);
+$disable_xmlrpc = get_option('simple_wp_toolbox_disable_xmlrpc', 0);
 
 if ($disable_xmlrpc) {
     // Disable XML-RPC
